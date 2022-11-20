@@ -13,7 +13,10 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \
-    cameralistmodel.cpp
+    cameralistmodel.cpp \
+    mainsettings.cpp \
+    dialogcoordedit.cpp \
+    videowidget.cpp
 
 HEADERS += \
     source/cencode.h \
@@ -21,10 +24,14 @@ HEADERS += \
     source/sha1.h \
     mainwindow.h \
     camera.h \
-    cameralistmodel.h
+    cameralistmodel.h \
+    mainsettings.h \
+    dialogcoordedit.h \
+    videowidget.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    dialogcoordedit.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

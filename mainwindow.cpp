@@ -1,16 +1,21 @@
 #include <QThread>
 #include <QGridLayout>
 #include <QNetworkRequest>
-
+#include <QGraphicsScene>
+#include <QGraphicsVideoItem>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "onvif.h"
+#include "source/onvif.h"
+#include "dialogcoordedit.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    config = new MainSettings();
     InitVideoWindow();
 
     connect(ui->pb_Move_Up, &QPushButton::pressed, [=] {CameraMove(0.0, 0.5, 0.0);});
@@ -26,11 +31,28 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pb_Zoom_Up, SIGNAL(released()), this, SLOT(ZoomStop()));
     connect(ui->pb_Zoom_Down, SIGNAL(released()), this, SLOT(ZoomStop()));
 
+    //QStandardItemModel *model = new QStandardItemModel(this);
+
+    model->setStringList(GetPointList());
+    ui->listView->setModel(model);
+
+    connect(ui->listView, SIGNAL(clicked(const QModelIndex)), this, SLOT(PointChanged(QModelIndex)));
+    connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(PointEdit(QModelIndex)));
 }
 
 MainWindow::~MainWindow()
 {
+    delete _player;
+    //delete _vw;
+    delete model;
+    delete videowdg;
+    delete scene;
     delete ui;
+}
+
+QStringList MainWindow::GetPointList()
+{
+    return config->GetPointList();
 }
 
 ///
@@ -51,7 +73,7 @@ void MainWindow::discover()
 
         initializeSession(onvif_session);
         int number_of_cameras = broadcast(onvif_session);
-//        str.append(QString("libonvif found %1 cameras\n").arg(QString::number(number_of_cameras)));
+        str.append(QString("libonvif found %1 cameras\n").arg(QString::number(number_of_cameras)));
 //        emit msg(str);
 
         for (int i=0; i<number_of_cameras; i++) {
@@ -125,31 +147,12 @@ void MainWindow::discover()
     }
     //stop();
 }
-/*
-void Discovery::addCamera(OnvifData *onvif_data)
-{
-    getProfile(onvif_data);
-    getDeviceInformation(onvif_data);
 
-    QString str;
-    str.append(QString("%1\n").arg(onvif_data->stream_uri));
-    str.append(QString("serial number: %1\nmfgr name: %2\n").arg(onvif_data->serial_number, onvif_data->camera_name));
-
-    QString key = onvif_data->serial_number;
-    QString alias = cameraAlias.value(key);
-    if (alias.length() > 0)
-        strncpy(onvif_data->camera_name, alias.toLatin1().data(), alias.length());
-
-    emit found(onvif_data);
-
-    str.append(QString("display name: %1\n").arg(onvif_data->camera_name));
-    emit msg(str);
-}
-*/
 
 void MainWindow::on_pushButton_clicked()
 {
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
+
 //    struct OnvifData *onvif_data = (struct OnvifData*)malloc(sizeof(struct OnvifData));
     initializeSession(onvif_session);
     int index = ui->Host->currentIndex();
@@ -184,7 +187,10 @@ void MainWindow::on_pushButton_clicked()
 
     saveProfiles("Profiles.txt", onvif_data);
 
-    CreateStream();
+    QString login = user + ":" + pass + "@";
+    QString url = QString(onvif_data->stream_uri);
+    url.insert(7,login);
+    CreateStream(url);
 
     closeSession(onvif_session);
     free(onvif_session);
@@ -194,6 +200,7 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
+    onvif_session->discovery_msg_id = 0;
     initializeSession(onvif_session);
     int number_of_cameras = broadcast(onvif_session);
     fprintf(stdout, "libonvif found %d cameras\n", number_of_cameras);
@@ -262,6 +269,29 @@ void MainWindow::on_pushButton_3_clicked()
 //    free(onvif_data);
 }
 
+void MainWindow::GetPosition()
+{
+    struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
+
+    OnvifData *onvif_data = GetCurrentOnviv();
+
+    initializeSession(onvif_session);
+
+    QString user = ui->UserName->text();
+    QString pass = ui->Password->text();
+    strcpy(onvif_data->username, user.toStdString().c_str());
+    strcpy(onvif_data->password, pass.toStdString().c_str());
+
+    //GetPosition(x,y,z,onvif_data);
+    //CurentPoint.X = x;
+    //CurentPoint.Y = y;
+    //CurentPoint.Z = z;
+
+
+    closeSession(onvif_session);
+    free(onvif_session);
+    //emit eUpdateShift;
+}
 
 /// Позиционирование и зумирование камеры
 /// \brief MainWindow::CameraMove
@@ -315,24 +345,73 @@ void MainWindow::addCamera(OnvifData *onvif_data)
 ///
 void MainWindow::InitVideoWindow()
 {
+
+    QGraphicsVideoItem *item = new QGraphicsVideoItem();
+    videowdg = new VideoWidget(this);
+    videowdg->move(290,5);
+    videowdg->resize(width()-295,height()-90);
+    //ui->mainwidget->setCentralWidget(videowdg);
+
+    // Инициализация сцены
+    scene = new QGraphicsScene(this);
+    //scene->setSceneRect(0.0, 0.0, ui->mainwidget->width()-2, ui->mainwidget->height()-2);
+    videowdg->setScene(scene);
+    //videowdg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    //QBrush brush;
+    //brush.setStyle(Qt::SolidPattern);
+    //brush.setColor(QColor(0,0,0));
+    //scene->setBackgroundBrush(brush);
+
+    item->setOffset(QPointF(0,0));
+    item->setSize(QSizeF(700,400));
+    scene->addItem(item);
+    /*
+    videowdg = new VideoWidget(this);
+    //videowdg->move(290,90);
+    //videowdg->resize(711,441);
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(_vw,0,0,0,0);
+    //layout->addWidget(_vw,0,0,0,0);
+    layout->addWidget(videowdg,0,0,0,0);
     ui->mainwidget->setLayout(layout);
+    //videowdg->setLayout(layout);
     //setCentralWidget(win);
-    _player->setVideoOutput(_vw);
+    //_player->setVideoOutput(_vw);
+    _player->setVideoOutput(videowdg);
+    */
+
+    /*VideoWidget *view = new VideoWidget(this);
+    view->move(290,90);
+    view->resize(711,441);
+    QGraphicsScene *scene = new QGraphicsScene(view);
+    QGraphicsVideoItem *item = new QGraphicsVideoItem();
+    view->setScene(scene);
+    scene->addItem(item);
+    view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);    // Растягиваем содержимое по виджету
+    scene->setSceneRect(0,0,view->width(),view->height());*/
+
+    _player = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
+    _player->setVideoOutput(item);
+
+
+    /*const QUrl url = QUrl("rtsp://admin:magos2020@192.168.0.64:554");
+    const QNetworkRequest requestRtsp(url);
+    _player->setMedia(requestRtsp);
+    _player->play();*/
 }
 
 
 /// Подключение камеры к видеоокну
 /// \brief MainWindow::CreateStream
 ///
-void MainWindow::CreateStream()
+void MainWindow::CreateStream(QString rtspurl)
 {
     if(_player->state() == QMediaPlayer::PlayingState)
     {
         _player->stop();
     }
-    const QUrl url = QUrl("rtsp://admin:magos2020@192.168.200.65");
+    const QUrl url = QUrl(rtspurl);
+    //const QUrl url = QUrl("rtsp://admin:magos2020@192.168.0.64:554");
     const QNetworkRequest requestRtsp(url);
     _player->setMedia(requestRtsp);
     _player->play();
@@ -397,13 +476,16 @@ OnvifData * MainWindow::GetCurrentOnviv()
 ///
 void MainWindow::on_pb_Preset_Load_clicked()
 {
-    char * pos = "1";
+    char* pos;
+    std::string  num = QString::number(CurrentPointIndex).toStdString();
+    pos = new char [num.size()+1];
+    strcpy( pos, num.c_str() );
+//    const char *p = QString::number(CurrentPointIndex).toStdString().c_str();
     OnvifData *onvif_data = GetCurrentOnviv();
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
-
+    //char * pos = "1";//  QString::number(CurrentPointIndex).toUtf8().data();// Local8Bit().data();
     gotoPreset(pos, onvif_data);
-//  setPreset(pos, onvif_data);
 
     closeSession(onvif_session);
     free(onvif_session);
@@ -414,13 +496,59 @@ void MainWindow::on_pb_Preset_Load_clicked()
 ///
 void MainWindow::on_pb_Preset_Save_clicked()
 {
-    char * pos = "1";
+    char* pos;
+    std::string  num = QString::number(CurrentPointIndex).toStdString();
+    pos = new char [num.size()+1];
+    strcpy( pos, num.c_str() );
+
     OnvifData *onvif_data = GetCurrentOnviv();
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
-
+    //char * pos =  "1";//QString::number(CurrentPointIndex).toUtf8().data();
     setPreset(pos, onvif_data);
 
     closeSession(onvif_session);
     free(onvif_session);
+}
+
+void MainWindow::PointChanged(const QModelIndex index)
+{
+    CurrentPointIndex = index.row()+1;
+}
+
+void MainWindow::PointEdit(const QModelIndex index)
+{
+    DialogCoordEdit * dialog = new DialogCoordEdit(this);
+    int i = index.row();
+    CamPoint cp = config->GetPoint(i);
+    dialog->SetCoord(cp.X,cp.Y,cp.Z);
+    if(dialog->exec()==QDialog::Accepted)
+    {// showNormal();
+        dialog->GetCoord(cp.X,cp.Y,cp.Z);
+        config->SetPoint(i,cp);
+        config->UpDatePoint();
+    }
+}
+
+void MainWindow::on_pushButton_SetCamCoord_clicked()
+{
+    int index = ui->Host->currentIndex();
+    Camera  *camera = cameraList->getCameraAt(index);
+    if(camera == nullptr) return ;
+
+    DialogCoordEdit * dialog = new DialogCoordEdit(this);
+    dialog->SetCoord(camera->Coord.X,camera->Coord.Y,camera->Coord.Z);
+    dialog->showNormal();
+    dialog->GetCoord(camera->Coord.X,camera->Coord.Y,camera->Coord.Z);
+}
+
+void MainWindow::on_toolButton_Add_clicked()
+{
+    CamPoint cp;
+    cp.X = 0;
+    cp.Y = 0;
+    cp.Z = 0;
+    config->AddPoint(cp);
+    config->UpDatePoint();
+    model->setStringList(GetPointList());
 }

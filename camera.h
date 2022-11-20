@@ -23,7 +23,8 @@
 #define CAMERA_H
 
 #include <QObject>
-#include "onvif.h"
+#include <source/onvif.h>
+#include "mainsettings.h"
 
 
 class Camera : public QObject
@@ -39,6 +40,7 @@ public:
 
     OnvifData *onvif_data;
     bool onvif_data_read = false;
+    CamPoint Coord;
 };
 
 #endif // CAMERA_H
