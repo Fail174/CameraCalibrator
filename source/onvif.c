@@ -1952,7 +1952,7 @@ int broadcast(struct OnvifSession *onvif_session) {
     broadcast_address.sin_family = AF_INET;
     broadcast_address.sin_port = htons(3702);
     broadcast_address.sin_addr.s_addr = inet_addr("192.168.200.255");
-    broadcast_address.sin_addr.s_addr = inet_addr("192.168.200.65");
+   // broadcast_address.sin_addr.s_addr = inet_addr("192.168.200.65");
     int status = sendto(broadcast_socket, broadcast_message, broadcast_message_length, 0, (struct sockaddr*)&broadcast_address, sizeof(broadcast_address));
     if (status < 0) {
         //error
