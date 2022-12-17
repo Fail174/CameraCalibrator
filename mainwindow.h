@@ -36,7 +36,7 @@ private slots:
     void CameraMove(float x,float y,float z);
     void CameraStop();
     void ZoomStop();
-    void GetPosition();
+    Point3D GetMarkPosition();
     void on_pb_Preset_Load_clicked();
     void PointChanged(const QModelIndex index);
     void PointEdit(const QModelIndex index);
@@ -46,8 +46,11 @@ private slots:
 
     void on_toolButton_Add_clicked();
 
+    void on_pb_CalculatDelta_clicked();
+
 private:
     Ui::MainWindow *ui;
+    QPixmap *map;
     VideoWidget *videowdg;
     MainSettings * config;
     QStringListModel *model = new QStringListModel(nullptr);

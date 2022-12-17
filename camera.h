@@ -40,7 +40,9 @@ public:
 
     OnvifData *onvif_data;
     bool onvif_data_read = false;
-    CamPoint Coord;
+    CamPoint Data;
+    QList<Point3D> *CameraPoint;//координаты точек в системе камеры
+    void SetPoint(int num, Point3D coord);
 };
 
 #endif // CAMERA_H

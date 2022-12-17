@@ -24,10 +24,12 @@
 Camera::Camera(OnvifData *arg)
 {
     onvif_data = arg;
+    CameraPoint = new QList<Point3D>();
 }
 
 Camera::~Camera()
 {
+    delete CameraPoint;
     free(onvif_data);
 }
 
@@ -42,4 +44,16 @@ bool Camera::hasPTZ()
         return false;
     else
         return true;
+}
+
+void Camera::SetPoint(int num, Point3D coord)
+{
+    if(num>CameraPoint->count())
+    {
+        CameraPoint->append(coord);
+    }else{
+        Point3D p = CameraPoint->at(num);
+        CameraPoint->removeAt(num);
+        CameraPoint->insert(num,coord);
+    }
 }

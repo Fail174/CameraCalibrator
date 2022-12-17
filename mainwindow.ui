@@ -107,7 +107,7 @@
       <x>10</x>
       <y>590</y>
       <width>271</width>
-      <height>181</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="title">
@@ -196,13 +196,13 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>780</y>
+      <y>770</y>
       <width>271</width>
-      <height>161</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="title">
-     <string>Текущая ошибка ориентации на точку</string>
+     <string>Текущая ошибка ориентации</string>
     </property>
     <widget class="QLineEdit" name="lineEdit_XShift">
      <property name="geometry">
@@ -227,7 +227,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Отклонение X , град</string>
+      <string>Азимут, град</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_4">
@@ -240,7 +240,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Отклонение Y, град</string>
+      <string>Угол места, град</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_YShift">
@@ -256,17 +256,43 @@
       <string>0</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="pb_CalculatDelta">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
+       <y>130</y>
        <width>241</width>
-       <height>41</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Расчитать поправку</string>
+      <string>Расчитать поправки</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_YShift_2">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>90</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>100</y>
+       <width>131</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Крен, град</string>
      </property>
     </widget>
    </widget>
@@ -301,7 +327,7 @@
      <rect>
       <x>290</x>
       <y>950</y>
-      <width>751</width>
+      <width>981</width>
       <height>61</height>
      </rect>
     </property>
@@ -412,7 +438,7 @@
       <item>
        <widget class="QLineEdit" name="UserName">
         <property name="text">
-         <string>admin</string>
+         <string>magos</string>
         </property>
        </widget>
       </item>
@@ -447,6 +473,25 @@
       </item>
      </layout>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label_map">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>6</y>
+      <width>981</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
    </widget>
   </widget>
  </widget>

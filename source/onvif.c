@@ -1122,6 +1122,55 @@ int getTimeOffset(struct OnvifData *onvif_data) {
     return result;
 }
 
+int getPosition(double *x, double *y, double *z, struct OnvifData *onvif_data)
+{
+    int result = 0;
+
+    xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
+    xmlNodePtr root = xmlNewDocNode(doc, NULL, BAD_CAST "Envelope", NULL);
+    xmlDocSetRootElement(doc, root);
+    xmlNsPtr ns_env = xmlNewNs(root, BAD_CAST "http://www.w3.org/2003/05/soap-envelope", BAD_CAST "SOAP-ENV");
+    xmlNsPtr ns_tds = xmlNewNs(root, BAD_CAST "http://www.onvif.org/ver10/device/wsdl", BAD_CAST "tds");
+    xmlSetNs(root, ns_env);
+    xmlNodePtr body = xmlNewTextChild(root, ns_env, BAD_CAST "Body", NULL);
+    xmlNewTextChild(body, ns_tds, BAD_CAST "GetStatus", NULL);
+    char cmd[4096] = {0};
+    addHttpHeader(doc, root, onvif_data->xaddrs, onvif_data->device_service, cmd, 4096);
+    xmlDocPtr reply = sendCommandToCamera(cmd, onvif_data->xaddrs);
+
+    if (reply != NULL) {
+        char getx[16];
+        char gety[16];
+        char getz[16];
+        char vx[16];
+        char vy[16];
+        char vz[16];
+
+
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:PanTilt//tt:Vector2D//tt::x", getx, 16);
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:PanTilt//tt:Vector2D//tt::y", gety, 16);
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:PanTilt//tt:Vector2D//tt::z", getz, 16);
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:Zoom//tt:Vector2D//tt::x", vx, 16);
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:Zoom//tt:Vector2D//tt::y", vy, 16);
+        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//PTZStatus//tds:Position//tt:PTZVector//tt:Zoom//tt:Vector2D//tt::z", vz, 16);
+//        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//tds:MoveStatus//tt:PTZMoveStatus//tt:Hour", hour_buf, 16);
+//        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//tds:Error//tt:PTZVector//tt:Hour", hour_buf, 16);
+//        getXmlValue(reply, BAD_CAST "//s:Body//tds:GetStatusResponse//tds:UtcTime//tt:PTZVector//tt:Hour", hour_buf, 16);
+        x = atoi(getx);
+        y = atoi(gety);
+        z = atoi(getz);
+
+        result = checkForXmlErrorMsg(reply, onvif_data->last_error);
+        xmlFreeDoc(reply);
+    }
+    else {
+        result = -1;
+        strcpy(onvif_data->last_error, "No XML reply");
+    }
+
+    return result;
+}
+
 int getStreamUri(struct OnvifData *onvif_data) {
     int result = 0;
     xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
@@ -1902,7 +1951,7 @@ int broadcast(struct OnvifSession *onvif_session) {
     memset((char *) &broadcast_address, 0, sizeof(broadcast_address));
     broadcast_address.sin_family = AF_INET;
     broadcast_address.sin_port = htons(3702);
-    broadcast_address.sin_addr.s_addr = inet_addr("192.168.200.255");
+    broadcast_address.sin_addr.s_addr = inet_addr("192.168.200.65");
     int status = sendto(broadcast_socket, broadcast_message, broadcast_message_length, 0, (struct sockaddr*)&broadcast_address, sizeof(broadcast_address));
     if (status < 0) {
         //error

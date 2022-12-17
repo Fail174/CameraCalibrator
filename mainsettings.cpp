@@ -112,17 +112,17 @@ void MainSettings::initSettings()
 
 CamPoint *MainSettings::initPoint(int i)
 {
-    CamPoint *Coord = new CamPoint;
+    CamPoint *Data = new CamPoint;
     QString fieldName = "POINT_" +QString::number(i)+"/Name";
     QString tmpStr = readValue(fieldName, "").toString();
 
     if(!tmpStr.isEmpty())
     {
-        Coord->Name = tmpStr;
+        Data->Name = tmpStr;
     }
     else {
-        Coord->Name = "Point " + QString::number(i);
-        saveValue(fieldName, Coord->Name);
+        Data->Name = "Point " + QString::number(i);
+        saveValue(fieldName, Data->Name);
     }
 
     fieldName = "POINT_" +QString::number(i)+"/CoordX";
@@ -132,10 +132,10 @@ CamPoint *MainSettings::initPoint(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->X));
-        else        Coord->X = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.X));
+        else        Data->Coord.X = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->X));
+    else saveValue(fieldName, QString::number(Data->Coord.X));
 
 
     fieldName = "POINT_" +QString::number(i)+"/CoordY";
@@ -144,10 +144,10 @@ CamPoint *MainSettings::initPoint(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->Y));
-        else        Coord->Y = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.Y));
+        else        Data->Coord.Y = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->Y));
+    else saveValue(fieldName, QString::number(Data->Coord.Y));
 
 
     fieldName = "POINT_" +QString::number(i)+"/CoordZ";
@@ -156,28 +156,28 @@ CamPoint *MainSettings::initPoint(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->Z));
-        else        Coord->Z = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.Z));
+        else        Data->Coord.Z = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->Z));
+    else saveValue(fieldName, QString::number(Data->Coord.Z));
 
-    return Coord;
+    return Data;
 }
 
 
 CamPoint *MainSettings::initCamera(int i)
 {
-    CamPoint *Coord = new CamPoint;
+    CamPoint *Data = new CamPoint;
     QString fieldName = "CAMERA_" +QString::number(i)+"/Name";
     QString tmpStr = readValue(fieldName, "").toString();
 
     if(!tmpStr.isEmpty())
     {
-        Coord->Name = tmpStr;
+        Data->Name = tmpStr;
     }
     else {
-        Coord->Name = "Camera " + QString::number(i);
-        saveValue(fieldName, Coord->Name);
+        Data->Name = "Camera " + QString::number(i);
+        saveValue(fieldName, Data->Name);
     }
 
     fieldName = "CAMERA_" +QString::number(i)+"/CoordX";
@@ -187,10 +187,10 @@ CamPoint *MainSettings::initCamera(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->X));
-        else        Coord->X = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.X));
+        else        Data->Coord.X = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->X));
+    else saveValue(fieldName, QString::number(Data->Coord.X));
 
 
     fieldName = "CAMERA_" +QString::number(i)+"/CoordY";
@@ -199,10 +199,10 @@ CamPoint *MainSettings::initCamera(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->Y));
-        else        Coord->Y = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.Y));
+        else        Data->Coord.Y = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->Y));
+    else saveValue(fieldName, QString::number(Data->Coord.Y));
 
 
     fieldName = "CAMERA_" +QString::number(i)+"/CoordZ";
@@ -211,12 +211,12 @@ CamPoint *MainSettings::initCamera(int i)
     {
         bool ok = false;
         tmpValue = tmpStr.toUInt(&ok);
-        if(!ok)     saveValue(fieldName, QString::number(Coord->Z));
-        else        Coord->Z = tmpValue;
+        if(!ok)     saveValue(fieldName, QString::number(Data->Coord.Z));
+        else        Data->Coord.Z = tmpValue;
     }
-    else saveValue(fieldName, QString::number(Coord->Z));
+    else saveValue(fieldName, QString::number(Data->Coord.Z));
 
-    return Coord;
+    return Data;
 }
 
 void MainSettings::AddPoint(CamPoint cp)
@@ -250,13 +250,13 @@ void MainSettings::UpDatePoint()
     {
         CamPoint cp = PointList->at(i);
         fieldName = "POINT_" +QString::number(i)+"/CoordX";
-        saveValue(fieldName, QString::number(cp.X));
+        saveValue(fieldName, QString::number(cp.Coord.X));
 
         fieldName = "POINT_" +QString::number(i)+"/CoordY";
-        saveValue(fieldName, QString::number(cp.Y));
+        saveValue(fieldName, QString::number(cp.Coord.Y));
 
         fieldName = "POINT_" +QString::number(i)+"/CoordZ";
-        saveValue(fieldName, QString::number(cp.Z));
+        saveValue(fieldName, QString::number(cp.Coord.Z));
     }
 }
 
@@ -268,13 +268,13 @@ void MainSettings::UpDateCamera()
     {
         CamPoint cp = CameraList->at(i);
         QString fieldName = "CAMERA_" +QString::number(i)+"/CoordX";
-        saveValue(fieldName, QString::number(cp.X));
+        saveValue(fieldName, QString::number(cp.Coord.X));
 
         fieldName = "CAMERA_" +QString::number(i)+"/CoordY";
-        saveValue(fieldName, QString::number(cp.Y));
+        saveValue(fieldName, QString::number(cp.Coord.Y));
 
         fieldName = "CAMERA_" +QString::number(i)+"/CoordZ";
-        saveValue(fieldName, QString::number(cp.Z));
+        saveValue(fieldName, QString::number(cp.Coord.Z));
     }
 }
 

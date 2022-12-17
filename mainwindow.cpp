@@ -7,7 +7,7 @@
 #include "ui_mainwindow.h"
 #include "source/onvif.h"
 #include "dialogcoordedit.h"
-
+#include "cameramath.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,6 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     config = new MainSettings();
+    map = new QPixmap("img/map.png");
+
+    ui->label_map->setScaledContents(true);
+    ui->label_map->setPixmap(*map);
     InitVideoWindow();
 
     connect(ui->pb_Move_Up, &QPushButton::pressed, [=] {CameraMove(0.0, 0.5, 0.0);});
@@ -42,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete map;
     delete _player;
     //delete _vw;
     delete model;
@@ -269,8 +274,10 @@ void MainWindow::on_pushButton_3_clicked()
 //    free(onvif_data);
 }
 
-void MainWindow::GetPosition()
+Point3D MainWindow::GetMarkPosition()
 {
+    Point3D pos;
+
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
 
     OnvifData *onvif_data = GetCurrentOnviv();
@@ -282,15 +289,17 @@ void MainWindow::GetPosition()
     strcpy(onvif_data->username, user.toStdString().c_str());
     strcpy(onvif_data->password, pass.toStdString().c_str());
 
-    //GetPosition(x,y,z,onvif_data);
-    //CurentPoint.X = x;
-    //CurentPoint.Y = y;
-    //CurentPoint.Z = z;
+    double x,y,z;
+    getPosition(&x,&y,&z,onvif_data);
+    pos.X = x;
+    pos.Y = y;
+    pos.Z = z;
 
 
     closeSession(onvif_session);
     free(onvif_session);
     //emit eUpdateShift;
+    return pos;
 }
 
 /// Позиционирование и зумирование камеры
@@ -348,8 +357,8 @@ void MainWindow::InitVideoWindow()
 
     QGraphicsVideoItem *item = new QGraphicsVideoItem();
     videowdg = new VideoWidget(this);
-    videowdg->move(290,5);
-    videowdg->resize(width()-295,height()-90);
+    videowdg->move(290,ui->label_map->height()+15);
+    videowdg->resize(width()-295,height()-ui->label_map->height()-ui->textEdit->height()-30);
     //ui->mainwidget->setCentralWidget(videowdg);
 
     // Инициализация сцены
@@ -509,6 +518,16 @@ void MainWindow::on_pb_Preset_Save_clicked()
 
     closeSession(onvif_session);
     free(onvif_session);
+
+    int index = ui->Host->currentIndex();
+    //читаем координаты маркера в системе камеры
+    Camera *cam = cameraList->getCameraAt(index);
+    if(CurrentPointIndex<cam->CameraPoint->count()&& CurrentPointIndex>=0){
+        cam->CameraPoint->removeAt(CurrentPointIndex);
+        cam->CameraPoint->insert(CurrentPointIndex,GetMarkPosition());
+    }else{
+        cam->CameraPoint->insert(CurrentPointIndex,GetMarkPosition());
+    }
 }
 
 void MainWindow::PointChanged(const QModelIndex index)
@@ -521,10 +540,10 @@ void MainWindow::PointEdit(const QModelIndex index)
     DialogCoordEdit * dialog = new DialogCoordEdit(this);
     int i = index.row();
     CamPoint cp = config->GetPoint(i);
-    dialog->SetCoord(cp.X,cp.Y,cp.Z);
+    dialog->SetCoord(cp.Coord.X,cp.Coord.Y,cp.Coord.Z);
     if(dialog->exec()==QDialog::Accepted)
     {// showNormal();
-        dialog->GetCoord(cp.X,cp.Y,cp.Z);
+        dialog->GetCoord(cp.Coord.X,cp.Coord.Y,cp.Coord.Z);
         config->SetPoint(i,cp);
         config->UpDatePoint();
     }
@@ -537,18 +556,49 @@ void MainWindow::on_pushButton_SetCamCoord_clicked()
     if(camera == nullptr) return ;
 
     DialogCoordEdit * dialog = new DialogCoordEdit(this);
-    dialog->SetCoord(camera->Coord.X,camera->Coord.Y,camera->Coord.Z);
+    dialog->SetCoord(camera->Data.Coord.X,camera->Data.Coord.Y,camera->Data.Coord.Z);
     dialog->showNormal();
-    dialog->GetCoord(camera->Coord.X,camera->Coord.Y,camera->Coord.Z);
+    dialog->GetCoord(camera->Data.Coord.X,camera->Data.Coord.Y,camera->Data.Coord.Z);
 }
 
 void MainWindow::on_toolButton_Add_clicked()
 {
     CamPoint cp;
-    cp.X = 0;
-    cp.Y = 0;
-    cp.Z = 0;
+    cp.Coord.X = 0;
+    cp.Coord.Y = 0;
+    cp.Coord.Z = 0;
     config->AddPoint(cp);
     config->UpDatePoint();
     model->setStringList(GetPointList());
+}
+
+void MainWindow::on_pb_CalculatDelta_clicked()
+{
+/*    int index = ui->Host->currentIndex();
+    Camera  *camera = cameraList->getCameraAt(index);
+    if(camera == nullptr) return ;
+*/
+    cameramath *cm = new cameramath();
+
+    QList<CamPoint> *cam = new QList<CamPoint>();
+
+    QList<Point3D> *point = new  QList<Point3D>();
+
+    for(int i =0 ; i<cameraList->cameras.count();i++)
+    {
+        Camera *cm = cameraList->getCameraAt(i);
+        cam->append(cm->Data);
+        for(int j=0;j<cm->CameraPoint->count();j++)
+        {
+            Point3D cpoint =  cm->CameraPoint->at(j);
+            point->append(cpoint);
+        }
+    }
+    cm->UpdateData(cam,config->PointList);//координаты камер и маркеров
+
+    cm->UpdatePointCoord(point);//координаты маркеров в системе камеры
+
+    delete point;
+    delete cam;
+    delete cm;
 }

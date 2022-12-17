@@ -16,7 +16,8 @@ SOURCES += \
     cameralistmodel.cpp \
     mainsettings.cpp \
     dialogcoordedit.cpp \
-    videowidget.cpp
+    videowidget.cpp \
+    cameramath.cpp
 
 HEADERS += \
     source/cencode.h \
@@ -27,7 +28,8 @@ HEADERS += \
     cameralistmodel.h \
     mainsettings.h \
     dialogcoordedit.h \
-    videowidget.h
+    videowidget.h \
+    cameramath.h
 
 FORMS += \
     mainwindow.ui \
