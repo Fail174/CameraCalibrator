@@ -269,7 +269,7 @@
       <string>Расчитать поправки</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEdit_YShift_2">
+    <widget class="QLineEdit" name="lineEdit_ZShift">
      <property name="geometry">
       <rect>
        <x>160</x>

@@ -574,8 +574,8 @@ void MainWindow::on_toolButton_Add_clicked()
 
 void MainWindow::on_pb_CalculatDelta_clicked()
 {
-/*    int index = ui->Host->currentIndex();
-    Camera  *camera = cameraList->getCameraAt(index);
+    int index = ui->Host->currentIndex();
+/*    Camera  *camera = cameraList->getCameraAt(index);
     if(camera == nullptr) return ;
 */
     cameramath *cm = new cameramath();
@@ -597,6 +597,12 @@ void MainWindow::on_pb_CalculatDelta_clicked()
     cm->UpdateData(cam,config->PointList);//координаты камер и маркеров
 
     cm->UpdatePointCoord(point);//координаты маркеров в системе камеры
+
+    cm->StartCalc(index);
+
+    ui->lineEdit_XShift->setText(QString::number(cm->dA));
+    ui->lineEdit_YShift->setText(QString::number(cm->dE));
+    ui->lineEdit_ZShift->setText(QString::number(cm->dC));
 
     delete point;
     delete cam;

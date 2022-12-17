@@ -65,7 +65,7 @@ double cameramath::CalcElevation(int nc, int p1)
     double dist = hypot3D(camerapoint1.X,camerapoint1.Y,camerapoint1.Z);
     double El2= asin(camerapoint1.Z/D)*180/M_PI;//полученный угол места на точку
 
-    return El2 - El1;//ошибка по углу места
+    return (El2 - El1)*180/M_PI;//ошибка по углу места
 
 }
 
