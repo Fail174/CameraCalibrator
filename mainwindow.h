@@ -48,9 +48,21 @@ private slots:
 
     void on_pb_CalculatDelta_clicked();
 
+    void on_toolButton_Add_CAM_clicked();
+
+    void on_pushButton_Save_clicked();
+
+    void on_pb_Move_Up_clicked();
+
+    void on_toolButton_Del_clicked();
+
 private:
     Ui::MainWindow *ui;
     QPixmap *map;
+    QPixmap mapbuffer;
+
+    QPixmap *icon_mark;
+    QPixmap *icon_camera;
     VideoWidget *videowdg;
     MainSettings * config;
     QStringListModel *model = new QStringListModel(nullptr);
@@ -67,6 +79,8 @@ private:
     void CreateStream(QString rtspurl);
     QStringList GetPointList();
     OnvifData * GetCurrentOnviv();
+    CamPoint GetScreeFromGeo(CamPoint p);
+    void paintEvent(QPaintEvent *event);
 
 signals:
     //void eUpdateShift(float X, Y, Z);

@@ -3,6 +3,7 @@
 #include <QNetworkRequest>
 #include <QGraphicsScene>
 #include <QGraphicsVideoItem>
+#include <QFile>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "source/onvif.h"
@@ -16,8 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     config = new MainSettings();
-    map = new QPixmap("img/map.png");
-
+    map = new QPixmap(":/images/img/map.png");
+    icon_camera = new QPixmap(":/images/img/camera-48.png");
+    icon_mark = new QPixmap(":/images/img/mark-48.png");
     ui->label_map->setScaledContents(true);
     ui->label_map->setPixmap(*map);
     InitVideoWindow();
@@ -37,18 +39,58 @@ MainWindow::MainWindow(QWidget *parent)
 
     //QStandardItemModel *model = new QStandardItemModel(this);
 
-    model->setStringList(GetPointList());
+    model->setStringList(config->GetPointList());
     ui->listView->setModel(model);
+    ui->Host->insertItems(0, config->GetCameraList());
 
     connect(ui->listView, SIGNAL(clicked(const QModelIndex)), this, SLOT(PointChanged(QModelIndex)));
     connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(PointEdit(QModelIndex)));
 }
 
+
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+    double ScaleX = (double)map->width()/ui->label_map->width();
+    double ScaleY = (double)map->height()/ui->label_map->height();
+    mapbuffer = map->copy();
+    QPainter paint(&mapbuffer);
+    for(int i=0; i<config->CameraList->count();i++)
+    {
+        CamPoint p = config->CameraList->at(i);
+        CamPoint s = GetScreeFromGeo(p);
+        paint.drawPixmap(QRect(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,20,20),*icon_camera);
+        paint.drawText(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,QString::number(i));
+    }
+
+    for(int i=0; i<config->PointList->count();i++)
+    {
+        CamPoint p = config->PointList->at(i);
+        CamPoint s = GetScreeFromGeo(p);
+        paint.drawPixmap(QRect(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,20,20),*icon_mark);
+        paint.drawText(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,QString::number(i));
+    }
+
+    ui->label_map->setPixmap(mapbuffer);
+    QMainWindow::paintEvent(event);
+}
+
+CamPoint MainWindow::GetScreeFromGeo(CamPoint p)
+{
+    CamPoint s;
+    double dx = config->mapX1-config->mapX2;
+    double dy = config->mapY1-config->mapY2;
+    s.Coord.X = ui->label_map->width() - (p.Coord.X-config->mapX2)*ui->label_map->width()/dx;
+    s.Coord.Y = ui->label_map->height() - (p.Coord.Y-config->mapY2)*ui->label_map->height()/dy;
+    s.Coord.Z = p.Coord.Z;
+    return s;
+}
+
 MainWindow::~MainWindow()
 {
     delete map;
+    delete icon_camera;
+    delete icon_mark;
     delete _player;
-    //delete _vw;
     delete model;
     delete videowdg;
     delete scene;
@@ -164,6 +206,7 @@ void MainWindow::on_pushButton_clicked()
     Camera  *camera = cameraList->getCameraAt(index);
     if(camera == nullptr) return;
     OnvifData *onvif_data = camera->onvif_data;
+    if(onvif_data == nullptr) return;
 
 
     QString onvifHost = ui->Host->currentText();
@@ -211,14 +254,19 @@ void MainWindow::on_pushButton_2_clicked()
     fprintf(stdout, "libonvif found %d cameras\n", number_of_cameras);
 
     ui->Host->clear();
-    for (int i = 0; i < number_of_cameras; i++) {
+    for (int i = 0; i < number_of_cameras; i++)
+    {
       struct OnvifData *onvif_data = (struct OnvifData*)malloc(sizeof(struct OnvifData));
       prepareOnvifData(i, onvif_session, onvif_data);
 
       ui->textEdit->append(onvif_data->camera_name);
       ui->textEdit->append( onvif_data->xaddrs );
       ui->textEdit->append( onvif_data->device_service );
-      ui->Host->addItem(onvif_data->xaddrs);
+      if(i<ui->Host->count()){
+            ui->Host->addItem(onvif_data->xaddrs);
+      }else{
+            ui->Host->setItemText(i,onvif_data->xaddrs);
+      }
 
 //      getCapabilities(onvif_data);
       getNetworkInterfaces(onvif_data);
@@ -281,6 +329,7 @@ Point3D MainWindow::GetMarkPosition()
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
 
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) pos;
 
     initializeSession(onvif_session);
 
@@ -313,6 +362,7 @@ void MainWindow::CameraMove(float x,float y,float z)
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
 
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) return;
 
     initializeSession(onvif_session);
 
@@ -432,6 +482,7 @@ void MainWindow::CreateStream(QString rtspurl)
 void MainWindow::ZoomStop()
 {
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) return;
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
 
@@ -452,6 +503,7 @@ void MainWindow::ZoomStop()
 void MainWindow::CameraStop()
 {
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) return;
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
 
@@ -491,6 +543,7 @@ void MainWindow::on_pb_Preset_Load_clicked()
     strcpy( pos, num.c_str() );
 //    const char *p = QString::number(CurrentPointIndex).toStdString().c_str();
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) return;
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
     //char * pos = "1";//  QString::number(CurrentPointIndex).toUtf8().data();// Local8Bit().data();
@@ -511,6 +564,7 @@ void MainWindow::on_pb_Preset_Save_clicked()
     strcpy( pos, num.c_str() );
 
     OnvifData *onvif_data = GetCurrentOnviv();
+    if(onvif_data == nullptr) return;
     struct OnvifSession *onvif_session = (struct OnvifSession*)malloc(sizeof(struct OnvifSession));
     initializeSession(onvif_session);
     //char * pos =  "1";//QString::number(CurrentPointIndex).toUtf8().data();
@@ -546,19 +600,28 @@ void MainWindow::PointEdit(const QModelIndex index)
         dialog->GetCoord(cp.Coord.X,cp.Coord.Y,cp.Coord.Z);
         config->SetPoint(i,cp);
         config->UpDatePoint();
+        update();
     }
 }
 
 void MainWindow::on_pushButton_SetCamCoord_clicked()
 {
     int index = ui->Host->currentIndex();
+    if((index<0)||(index>config->CameraList->count()))return;
     Camera  *camera = cameraList->getCameraAt(index);
-    if(camera == nullptr) return ;
+    CamPoint cmp = config->CameraList->at(index);
 
     DialogCoordEdit * dialog = new DialogCoordEdit(this);
-    dialog->SetCoord(camera->Data.Coord.X,camera->Data.Coord.Y,camera->Data.Coord.Z);
-    dialog->showNormal();
-    dialog->GetCoord(camera->Data.Coord.X,camera->Data.Coord.Y,camera->Data.Coord.Z);
+    dialog->SetCoord(cmp.Coord.X,cmp.Coord.Y,cmp.Coord.Z);
+    if(dialog->exec()==QDialog::Accepted)
+    {
+        dialog->GetCoord(cmp.Coord.X,cmp.Coord.Y,cmp.Coord.Z);
+        if(camera != nullptr)
+            dialog->GetCoord(camera->Data.Coord.X,camera->Data.Coord.Y,camera->Data.Coord.Z);
+        config->SetCamera(index,cmp);
+        config->UpDateCamera();
+        update();
+    }
 }
 
 void MainWindow::on_toolButton_Add_clicked()
@@ -570,6 +633,7 @@ void MainWindow::on_toolButton_Add_clicked()
     config->AddPoint(cp);
     config->UpDatePoint();
     model->setStringList(GetPointList());
+    update();
 }
 
 void MainWindow::on_pb_CalculatDelta_clicked()
@@ -578,7 +642,7 @@ void MainWindow::on_pb_CalculatDelta_clicked()
 /*    Camera  *camera = cameraList->getCameraAt(index);
     if(camera == nullptr) return ;
 */
-    cameramath *cm = new cameramath();
+    cameramath *cmath = new cameramath();
 
     QList<CamPoint> *cam = new QList<CamPoint>();
 
@@ -594,17 +658,82 @@ void MainWindow::on_pb_CalculatDelta_clicked()
             point->append(cpoint);
         }
     }
-    cm->UpdateData(cam,config->PointList);//координаты камер и маркеров
+    cmath->UpdateData(cam,config->PointList);//координаты камер и маркеров
 
-    cm->UpdatePointCoord(point);//координаты маркеров в системе камеры
+    cmath->UpdatePointCoord(point);//координаты маркеров в системе камеры
 
-    cm->StartCalc(index);
+    cmath->StartCalc(index);
 
-    ui->lineEdit_XShift->setText(QString::number(cm->dA));
-    ui->lineEdit_YShift->setText(QString::number(cm->dE));
-    ui->lineEdit_ZShift->setText(QString::number(cm->dC));
-
+    ui->lineEdit_XShift->setText(QString::number(cmath->dA));
+    ui->lineEdit_YShift->setText(QString::number(cmath->dE));
+    ui->lineEdit_ZShift->setText(QString::number(cmath->dC));
+    Camera *cm = cameraList->getCameraAt(index);
+    if(cm!=nullptr){
+        cm->A = cmath->dA;
+        cm->E = cmath->dE;
+        cm->C = cmath->dC;
+    }
     delete point;
     delete cam;
-    delete cm;
+    delete cmath;
 }
+
+void MainWindow::on_toolButton_Add_CAM_clicked()
+{
+    DialogCoordEdit * dialog = new DialogCoordEdit(this);
+    CamPoint cp;
+    //dialog->SetCoord(cp.Coord.X,cp.Coord.Y,cp.Coord.Z);
+    if(dialog->exec()==QDialog::Accepted)
+    {
+        int i = config->CameraList->count();
+        cp.Name = "Camera " + QString::number(i+1);
+        ui->Host->addItem(cp.Name);
+        dialog->GetCoord(cp.Coord.X,cp.Coord.Y,cp.Coord.Z);
+        config->AddCamera(cp);
+        config->UpDateCamera();
+        update();
+    }
+}
+
+
+void MainWindow::on_pushButton_Save_clicked()
+{
+    QFile filetxt;//логфайл данных РГМ и КРС
+
+    filetxt.setFileName("table.txt");
+    if (!filetxt.open(QIODevice::WriteOnly))
+    {
+        return;
+    }
+    QTextStream wstream(&filetxt);
+    for(int i =0 ; i<cameraList->cameras.count();i++)
+    {
+        Camera *cam = cameraList->cameras.at(i);
+        wstream << " Camera " << i << ": Azimut=" << cam->A <<
+                                      " Elevation=" << cam->E <<
+                                      " Cren=" << cam->C << "\n";
+    }
+
+    filetxt.close();
+}
+
+
+void MainWindow::on_pb_Move_Up_clicked()
+{
+    QModelIndex index=ui->listView->currentIndex();
+    if(index.row() >=0)
+    {
+        int i = index.row();
+        config->DelPoint(i);
+        config->UpDatePoint();
+        model->setStringList(GetPointList());
+        update();
+    }
+}
+
+
+void MainWindow::on_toolButton_Del_clicked()
+{
+
+}
+

@@ -91,9 +91,10 @@ double cameramath::CalcAzimut(int nc, int p1)
 
 bool cameramath::StartCalc(int nc)
 {
-    double dA=0;
-    double dE=0;
-    double dC=0;
+    dA=0;
+    dE=0;
+    dC=0;
+    if((nc<0)||(CameraList.count()<=nc)) return false;
     int i=0,j;
     for(i=0;i<Pointlist.count();i++)
     {

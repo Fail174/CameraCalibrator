@@ -74,3 +74,6 @@ unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib64/ -lxml2
 
 INCLUDEPATH += $$PWD/../../../../../usr/lib64
 DEPENDPATH += $$PWD/../../../../../usr/lib64
+
+RESOURCES += \
+    calibrator_images.qrc
