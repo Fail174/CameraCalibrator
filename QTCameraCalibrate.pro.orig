@@ -1,43 +1,32 @@
 QT       += core gui
-QT       += network
+#QT       += network
 QT       += multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+CONFIG += link_pkgconfig
 
 CONFIG += c++11
 
 SOURCES += \
-    source/cencode.c \
-    source/onvif.c \
-    source/sha1.c \
+    onvifcontrol.cpp \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \
     cameralistmodel.cpp \
     mainsettings.cpp \
     dialogcoordedit.cpp \
-<<<<<<< HEAD
     videowidget.cpp \
     cameramath.cpp
-=======
-    videowidget.cpp
->>>>>>> 3a87fc026c771105b6d820251bd8e2eda02e3910
 
 HEADERS += \
-    source/cencode.h \
-    source/onvif.h \
-    source/sha1.h \
+    onvifcontrol.h \
     mainwindow.h \
     camera.h \
     cameralistmodel.h \
     mainsettings.h \
     dialogcoordedit.h \
-<<<<<<< HEAD
     videowidget.h \
     cameramath.h
-=======
-    videowidget.h
->>>>>>> 3a87fc026c771105b6d820251bd8e2eda02e3910
 
 FORMS += \
     mainwindow.ui \
@@ -48,6 +37,21 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+<<<<<<< HEAD
+INCLUDEPATH += \
+    include/libonvif/ \
+    include/libonvif/gsoap \
+    include/libonvif/generated \
+    libonvif \
+    /usr/include/openssl \
+LIBS += -L/usr/local/lib
+LIBS += \
+    -lonvifcommon \
+    -lonvifdevice \
+    -lonvifmedia \
+    -lonvifptz \
+    -lonvifdiscovery
+=======
 # Linux with static libxml2, i.e. Ubuntu
 # install libxml2 and libxml2-devel with apt
 #unix {
@@ -82,3 +86,7 @@ unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib64/ -lxml2
 
 INCLUDEPATH += $$PWD/../../../../../usr/lib64
 DEPENDPATH += $$PWD/../../../../../usr/lib64
+>>>>>>> c98ea0d4cfa8412408ce63e2e33cf58f9c8824ad
+
+RESOURCES += \
+    calibrator_images.qrc
