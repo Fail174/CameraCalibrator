@@ -20,35 +20,55 @@
 *******************************************************************************/
 
 #include "camera.h"
+#include <cmath>
 
-Camera::Camera(OnvifData *arg)
+Camera::Camera(QString addr)
 {
-    onvif_data = arg;
+    xaddrs = addr;
     CameraPoint = new QList<Point3D>();
 }
 
 Camera::~Camera()
 {
     delete CameraPoint;
-    free(onvif_data);
 }
 
 QString Camera::getCameraName()
 {
-    return QString(onvif_data->camera_name);
+    return xaddrs;
 }
 
-bool Camera::hasPTZ()
+double Camera::GetRange(int i)
 {
-    if (strcmp(onvif_data->ptz_service, "") == 0)
-        return false;
-    else
-        return true;
+    double dx = CameraPoint->at(i).X;
+    double dy = CameraPoint->at(i).Y;
+    double dz = CameraPoint->at(i).Z;
+    double A = sqrt(dz*dz+dy*dy+dx*dx);
+    return  A;
+}
+
+double Camera::GetAzimut(int i)
+{
+    double dx = CameraPoint->at(i).X;
+    double dy = CameraPoint->at(i).Y;
+    double A = atan(dx/dy);
+    if(A<0) A = A + M_PI*2;
+    return  A*180/M_PI;
+}
+
+double Camera::GetElevation(int i)
+{
+    double dx = CameraPoint->at(i).X;
+    double dy = CameraPoint->at(i).Y;
+    double dz = CameraPoint->at(i).Z;
+    double E = atan(dz/sqrt(dy*dy+dx*dx));
+    if(E>M_PI/2) E = E - M_PI*2;
+    return  E*180/M_PI;
 }
 
 void Camera::SetPoint(int num, Point3D coord)
 {
-    if(num>CameraPoint->count())
+    if(num>=CameraPoint->count())
     {
         CameraPoint->append(coord);
     }else{

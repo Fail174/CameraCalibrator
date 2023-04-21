@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>img/camera-48.png</file>
+        <file>img/map.png</file>
+        <file>img/mark-48.png</file>
+    </qresource>
+</RCC>

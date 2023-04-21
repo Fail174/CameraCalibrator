@@ -23,7 +23,6 @@
 #define CAMERA_H
 
 #include <QObject>
-#include <source/onvif.h>
 #include "mainsettings.h"
 
 
@@ -32,15 +31,20 @@ class Camera : public QObject
     Q_OBJECT
 
 public:
-    Camera(OnvifData *arg);
+    Camera(QString addr);
     ~Camera();
+    QString xaddrs;
 
     QString getCameraName();
-    bool hasPTZ();
 
-    OnvifData *onvif_data;
     bool onvif_data_read = false;
     CamPoint Data;
+    double A;
+    double E;
+    double C;
+    double GetAzimut(int i);
+    double GetElevation(int i);
+    double GetRange(int i);
     QList<Point3D> *CameraPoint;//координаты точек в системе камеры
     void SetPoint(int num, Point3D coord);
 };

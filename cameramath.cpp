@@ -3,7 +3,10 @@
 
 cameramath::cameramath()
 {
-
+            //1 - 57.964123, 31.380582   высота 23,5 м
+            //2 - 57.964166, 31.380603 высота 23,5 м
+            //3 - 57.970696, 31.381620 высота 12,5 м
+            //4 - 57.969204, 31.378819 высота 45 м
 }
 
 double cameramath::hypot3D(double x, double y, double z)
@@ -88,12 +91,17 @@ double cameramath::CalcAzimut(int nc, int p1)
 
     return a2-a1;//поправка по азимуту
 }
-
+///
+/// \brief cameramath::StartCalc
+/// \param nc
+/// \return
+/// Расчет поправок для камеры номер nc
 bool cameramath::StartCalc(int nc)
 {
-    double dA=0;
-    double dE=0;
-    double dC=0;
+    dA=0;
+    dE=0;
+    dC=0;
+    if((nc<0)||(CameraList.count()<=nc)) return false;
     int i=0,j;
     for(i=0;i<Pointlist.count();i++)
     {

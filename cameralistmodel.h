@@ -23,6 +23,7 @@
 #define LISTMODEL_H
 
 #include "camera.h"
+#include "onvifcontrol.h"
 #include <list>
 #include <QVector>
 #include <QAbstractListModel>
@@ -38,8 +39,9 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int rolw = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    void pushCamera(OnvifData *onvif_data);
+    void pushCamera(OnvifControl *onvif_data);
     Camera * getCameraAt(int index);
+    void delCameraAt(int index);
     int current_index = -1;
     QVector<Camera *> cameras;
 

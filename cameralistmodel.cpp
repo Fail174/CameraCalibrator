@@ -46,7 +46,9 @@ bool CameraListModel::setData(const QModelIndex &index, const QVariant &value, i
 {
     if (index.isValid() && role == Qt::EditRole) {
         Camera *camera = (Camera *)cameras[index.row()];
-        strncpy(camera->onvif_data->camera_name, value.toString().toLatin1(), value.toString().length());
+        //char *str;
+        //strncpy(str, value.toString().toLatin1(), value.toString().length());
+        camera->xaddrs = value.toString();
         return true;
     }
     else {
@@ -69,15 +71,15 @@ void CameraListModel::endInsertItems()
     //endInsertRows();
 }
 
-void CameraListModel::pushCamera(OnvifData *onvif_data)
+void CameraListModel::pushCamera(OnvifControl *onvif_data)
 {
     bool found = false;
     for (int i = 0; i < cameras.size(); i++) {
-        if (!strcmp(onvif_data->xaddrs, cameras[i]->onvif_data->xaddrs))
+        if (!strcmp(onvif_data->xaddrs.toStdString().c_str(), cameras[i]->xaddrs.toStdString().c_str()))
             found = true;
     }
     if (!found) {
-        Camera *camera = new Camera(onvif_data);
+        Camera *camera = new Camera(onvif_data->xaddrs);
         cameras.push_back(camera);
         emit dataChanged(QModelIndex(), QModelIndex());
     }
@@ -90,6 +92,14 @@ Camera * CameraListModel::getCameraAt(int index)
         return cameras[index];
     }else{
         return nullptr;
+    }
+}
+
+void CameraListModel::delCameraAt(int index)
+{
+    if(cameras.length()>index && index>=0)
+    {
+        cameras.removeAt(index);
     }
 }
 

@@ -14,6 +14,8 @@ class DialogCoordEdit : public QDialog
 public:
     explicit DialogCoordEdit(QWidget *parent = 0);
     ~DialogCoordEdit();
+    void SetName(QString name);
+    QString GetName();
     void SetCoord(double X, double Y, double Z);
     void GetCoord(double &X, double &Y, double &Z);
 private:

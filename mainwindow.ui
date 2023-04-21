@@ -27,7 +27,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>530</y>
       <width>271</width>
       <height>231</height>
      </rect>
@@ -53,12 +53,12 @@
       <rect>
        <x>10</x>
        <y>170</y>
-       <width>91</width>
+       <width>101</width>
        <height>41</height>
       </rect>
      </property>
      <property name="text">
-      <string>Считать</string>
+      <string>Сброс</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pb_Preset_Save">
@@ -71,7 +71,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Записать</string>
+      <string>Сохранить</string>
      </property>
     </widget>
     <widget class="QToolButton" name="toolButton_Add">
@@ -105,9 +105,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>590</y>
+      <y>310</y>
       <width>271</width>
-      <height>171</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="title">
@@ -190,6 +190,35 @@
      <property name="text">
       <string>Вправо</string>
      </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>170</y>
+       <width>241</width>
+       <height>34</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_Azimut">
+        <property name="text">
+         <string>Азимут:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="edit_Azimut">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_3">
@@ -296,26 +325,13 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="pushButton_Save">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>950</y>
       <width>271</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Расчет таблицы передаточной функции</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_5">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>980</y>
-      <width>271</width>
-      <height>31</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
@@ -326,9 +342,9 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>950</y>
+      <y>930</y>
       <width>981</width>
-      <height>61</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="layoutDirection">
@@ -341,31 +357,31 @@
       <x>10</x>
       <y>140</y>
       <width>271</width>
-      <height>201</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="title">
      <string>Камеры</string>
     </property>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="toolButton_Del_CAM">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>180</x>
        <y>30</y>
-       <width>251</width>
+       <width>81</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Получить список камер</string>
+      <string>Удалить</string>
      </property>
     </widget>
     <widget class="QComboBox" name="Host">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>50</x>
        <y>70</y>
-       <width>251</width>
+       <width>211</width>
        <height>31</height>
       </rect>
      </property>
@@ -392,14 +408,40 @@
     <widget class="QPushButton" name="pushButton_SetCamCoord">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>251</width>
+       <x>90</x>
+       <y>30</y>
+       <width>91</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Координаты</string>
+      <string>Изменить</string>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="toolButton_Add_CAM">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Добавить</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_CAM_IP">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>31</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>IP</string>
      </property>
     </widget>
    </widget>

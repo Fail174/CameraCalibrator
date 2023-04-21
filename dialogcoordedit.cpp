@@ -13,6 +13,18 @@ DialogCoordEdit::~DialogCoordEdit()
     delete ui;
 }
 
+
+void DialogCoordEdit::SetName(QString name)
+{
+    ui->lineEdit_Name->setText(name);
+}
+
+
+QString DialogCoordEdit::GetName()
+{
+    return ui->lineEdit_Name->text();
+}
+
 void DialogCoordEdit::SetCoord(double X, double Y, double Z)
 {
     ui->lineEdit_Lat->setText(QString::number(X));
