@@ -66,9 +66,9 @@ double cameramath::CalcElevation(int nc, int p1)
     int N = Pointlist.count();
     Point3D camerapoint1 = CameraPoint.at(nc*N+p1);
     double dist = hypot3D(camerapoint1.X,camerapoint1.Y,camerapoint1.Z);
-    double El2= asin(camerapoint1.Z/D)*180/M_PI;//полученный угол места на точку
+    double El2= asin(camerapoint1.Z/dist)*180/M_PI;//полученный угол места на точку
 
-    return (El2 - El1)*180/M_PI;//ошибка по углу места
+    return (El2 - El1);//ошибка по углу места
 
 }
 
@@ -89,7 +89,7 @@ double cameramath::CalcAzimut(int nc, int p1)
     Point3D camerapoint = CameraPoint.at(nc*N+p1);
     double a2 = atan(camerapoint.X/camerapoint.Y);//полученный азимут
 
-    return a2-a1;//поправка по азимуту
+    return (a2-a1)*180/M_PI;//поправка по азимуту
 }
 ///
 /// \brief cameramath::StartCalc
@@ -147,15 +147,15 @@ void cameramath::UpdateData(QList<CamPoint> *cam, QList<CamPoint> *pl)
     }
 }
 
-void cameramath::UpdatePointCoord(QList<Point3D> *p)//координаты маркеров в системе камеры
+void cameramath::UpdatePointCoord(int icam, QList<Point3D> *p)//координаты маркеров в системе камеры
 {
     if( p!=nullptr)
     {
-        CameraPoint.clear();
+        //CameraPoint.clear();
         for(int i=0;i<p->count();i++)
         {
             Point3D point = p->at(i);
-            CameraPoint.append(point);
+            CameraPoint.insert(icam*p->count()+i, point);
         }
     }
 }

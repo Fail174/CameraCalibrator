@@ -53,25 +53,25 @@
       <rect>
        <x>10</x>
        <y>170</y>
-       <width>101</width>
+       <width>111</width>
        <height>41</height>
       </rect>
      </property>
      <property name="text">
-      <string>Сброс</string>
+      <string>Сброс камеры</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pb_Preset_Save">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>140</x>
        <y>170</y>
-       <width>91</width>
+       <width>121</width>
        <height>41</height>
       </rect>
      </property>
      <property name="text">
-      <string>Сохранить</string>
+      <string>Записать</string>
      </property>
     </widget>
     <widget class="QToolButton" name="toolButton_Add">
@@ -191,19 +191,16 @@
       <string>Вправо</string>
      </property>
     </widget>
-    <widget class="QWidget" name="layoutWidget_2">
+    <widget class="QWidget" name="">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>170</y>
-       <width>241</width>
-       <height>34</height>
+       <x>11</x>
+       <y>171</y>
+       <width>251</width>
+       <height>27</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="topMargin">
-       <number>0</number>
-      </property>
       <item>
        <widget class="QLabel" name="label_Azimut">
         <property name="text">
@@ -213,6 +210,20 @@
       </item>
       <item>
        <widget class="QLineEdit" name="edit_Azimut">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_Azimut_2">
+        <property name="text">
+         <string>Угол места:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="edit_Elevation">
         <property name="text">
          <string>0</string>
         </property>

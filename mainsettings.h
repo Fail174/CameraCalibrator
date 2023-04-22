@@ -20,9 +20,10 @@ class MainSettings
 public:
     uint PointCount = 0;
     uint CameraCount = 0;
+    //кординаты верхнего левого и нижнего правого углов карты
     double mapX1=6429078.837;
-    double mapX2=6426858.325;
     double mapY1=6404852.044;
+    double mapX2=6426858.325;
     double mapY2=6403720.353;
 
     QList<CamPoint> *PointList = nullptr;

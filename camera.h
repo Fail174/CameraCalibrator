@@ -39,9 +39,9 @@ public:
 
     bool onvif_data_read = false;
     CamPoint Data;
-    double A;
-    double E;
-    double C;
+    double A=0;
+    double E=0;
+    double C=0;
     double GetAzimut(int i);
     double GetElevation(int i);
     double GetRange(int i);

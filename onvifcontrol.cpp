@@ -178,9 +178,9 @@ PtzStatus OnvifControl::getPtzStatus()
                 if( ptz->Position->PanTilt )
                 {
                     if( ptz->Position->PanTilt->x )
-                        status.tilt = ptz->Position->PanTilt->x;
+                        status.tilt = ptz->Position->PanTilt->y;
                     if( ptz->Position->PanTilt->y )
-                        status.pan = ptz->Position->PanTilt->y;
+                        status.pan = ptz->Position->PanTilt->x;
                 }
                 if( ptz->Position->Zoom && ptz->Position->Zoom->x )
                     status.zoom = ptz->Position->Zoom->x;

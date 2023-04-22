@@ -63,6 +63,7 @@ double Camera::GetElevation(int i)
     double dz = CameraPoint->at(i).Z;
     double E = atan(dz/sqrt(dy*dy+dx*dx));
     if(E>M_PI/2) E = E - M_PI*2;
+    if(E<-M_PI/2) E = E + M_PI*2;
     return  E*180/M_PI;
 }
 

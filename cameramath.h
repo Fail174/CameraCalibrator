@@ -55,7 +55,7 @@ public:
     bool StartCalc(int nc);
 
     void UpdateData(QList<CamPoint> *cam, QList<CamPoint> *pl);
-    void UpdatePointCoord(QList<Point3D> *p);//координаты маркеров в системе камеры
+    void UpdatePointCoord(int icam, QList<Point3D> *p);//координаты маркеров в системе камеры
 };
 
 #endif // CAMERAMATH_H

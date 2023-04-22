@@ -250,13 +250,14 @@ Point3D MainWindow::GetMarkPosition()
 
     PtzStatus status = onvif->getPtzStatus();
     //getPosition(&x,&y,&z,onvif_data);
-    pos.X = status.tilt;
-    pos.Y = status.pan;
+    pos.X = status.pan;
+    pos.Y = status.tilt;
     pos.Z = status.zoom;
 
-    CurrentAzimut = pos.X*180;//grad
-    CurrentElevation = pos.Y*90;//grad
+    CurrentAzimut = pos.X*180.0;//grad
+    CurrentElevation = pos.Y*90.0;//grad
     ui->edit_Azimut->setText(QString::number(CurrentAzimut));
+    ui->edit_Elevation->setText(QString::number(CurrentElevation));
     return pos;
 }
 
@@ -396,8 +397,8 @@ void MainWindow::on_pb_Preset_Load_clicked()
 {
     double az,el;
     Camera *cam = cameraList->cameras.at(ui->Host->currentIndex());
-    az = cam->GetAzimut(CurrentPointIndex-1)/180-1;
-    el = cam->GetElevation(CurrentPointIndex-1)/180;
+    az = (-cam->A + cam->GetAzimut(CurrentPointIndex-1))/180-1;
+    el = (-cam->E + cam->GetElevation(CurrentPointIndex-1))/180;
 
     onvif->AbsoluteMove(az,el,0);
 }
@@ -413,9 +414,9 @@ void MainWindow::on_pb_Preset_Save_clicked()
     Camera *cam = cameraList->cameras.at(ui->Host->currentIndex());
     d = cam->GetRange(CurrentPointIndex-1);
     double xy = cos(CurrentElevation*M_PI/180)*d;
-    p.Z = tan(CurrentElevation)*xy;//H
-    p.X = cos(CurrentAzimut)*xy;//X
-    p.Y = sin(CurrentAzimut)*xy;//Y
+    p.Z = tan(CurrentElevation*M_PI/180)*xy;//H
+    p.X = sin(CurrentAzimut*M_PI/180)*xy;//X
+    p.Y = cos(CurrentAzimut*M_PI/180)*xy;//Y
     cam->SetPoint(CurrentPointIndex-1,p);
 }
 
@@ -498,7 +499,7 @@ void MainWindow::on_pb_CalculatDelta_clicked()
     }
     cmath->UpdateData(cam,config->PointList);//координаты камер и маркеров
 
-    cmath->UpdatePointCoord(point);//координаты маркеров в системе камеры
+    cmath->UpdatePointCoord(index, point);//координаты маркеров в системе камеры
 
     cmath->StartCalc(index);
 
