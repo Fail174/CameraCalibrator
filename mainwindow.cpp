@@ -107,18 +107,19 @@ void MainWindow::paintEvent(QPaintEvent *event)
     QPainter paint(&mapbuffer);
     for(int i=0; i<config->CameraList->count();i++)
     {
+
         CamPoint p = config->CameraList->at(i);
         CamPoint s = GetScreeFromGeo(p);
-        paint.drawPixmap(QRect(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,20,20),*icon_camera);
-        paint.drawText(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,QString::number(i));
+        paint.drawPixmap(QRect(s.Coord.X*ScaleX-10,s.Coord.Y*ScaleY-10,20,20),*icon_camera);
+        paint.drawText(s.Coord.X*ScaleX+10,s.Coord.Y*ScaleY-10,QString::number(i+1));
     }
 
     for(int i=0; i<config->PointList->count();i++)
     {
         CamPoint p = config->PointList->at(i);
         CamPoint s = GetScreeFromGeo(p);
-        paint.drawPixmap(QRect(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,20,20),*icon_mark);
-        paint.drawText(s.Coord.X*ScaleX,s.Coord.Y*ScaleY,QString::number(i));
+        paint.drawPixmap(QRect(s.Coord.X*ScaleX-10,s.Coord.Y*ScaleY-10,20,20),*icon_mark);
+        paint.drawText(s.Coord.X*ScaleX+10,s.Coord.Y*ScaleY-10,QString::number(i+1));
     }
     if((CurrentPointIndex>0)&&(ui->Host->currentIndex()>=0))
     {
@@ -585,43 +586,43 @@ CamPoint MainWindow::GetPointCoord(int i)
 
     switch(i)
     {
-    case 0:
-        p.Name = "Маркер 1";
-        p.Coord.X = 6428534.783;
-        p.Coord.Y = 6404049.169;
-        p.Coord.Z = 23.5;
-        break;
-    case 1:
-        p.Name = "Маркер 2";
-        p.Coord.X = 6428439.542;
-        p.Coord.Y = 6404150.527;
-        p.Coord.Z = 23.5;
-        break;
-    case 2:
-        p.Name = "Маркер 3";
-        p.Coord.X = 6429165.265;
-        p.Coord.Y = 6404228.132;
-        p.Coord.Z = 12.5;
+
+    case 4:
+        p.Name = "Маркер 5";
+        p.Coord.X = 6427151.294;
+        p.Coord.Y = 6404238.657;
+        p.Coord.Z = 2;
         break;
     case 3:
         p.Name = "Маркер 4";
-        p.Coord.X = 6429003.093;
-        p.Coord.Y = 6404058.408;
-        p.Coord.Z = 45;
+        p.Coord.X = 6427483.457;
+        p.Coord.Y = 6404401.018;
+        p.Coord.Z = 2;
         break;
-    case 4:
-        p.Name = "Маркер 5";
-        p.Coord.X = 6429003.093;
-        p.Coord.Y = 6404058.408;
-        p.Coord.Z = 45;
+    case 2:
+        p.Name = "Маркер 3";
+        p.Coord.X = 6428231.792;
+        p.Coord.Y = 6404656.485;
+        p.Coord.Z = 2;
+        break;
+    case 1:
+        p.Name = "Маркер 2";
+        p.Coord.X = 6428572.938	;
+        p.Coord.Y = 6404760.424;
+        p.Coord.Z = 2;
+        break;
+    case 0:
+        p.Name = "Маркер 1";
+        p.Coord.X = 6428892.715	;
+        p.Coord.Y = 6404830.682;
+        p.Coord.Z = 2;
         break;
     default:
         p.Name = "Маркер ";
-        p.Coord.X = 6428434.783;
-        p.Coord.Y = 6404149.169;
-        p.Coord.Z = 23.5;
+        p.Coord.X = 6429248.501;
+        p.Coord.Y = 6404853.299;
+        p.Coord.Z = 2;
         break;
-
     }
     return p;
     //1 - 57.964123, 31.380582   высота 23,5 м
@@ -717,6 +718,7 @@ void MainWindow::on_toolButton_Del_clicked()
         config->DelPoint(i);
         config->UpDatePoint();
         model->setStringList(GetPointList());
+        CurrentPointIndex = CurrentPointIndex - 1;
         update();
     }
 }
