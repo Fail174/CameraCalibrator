@@ -3,17 +3,56 @@
 #include "CmdLineParser.h"
 #include "SoapHelper.h"
 #include "soapStub.h"
+#include "OnvifMediaClient.h"
+#include "OnvifDeviceClient.h"
 
+const QString mediasrv = "http://www.onvif.org/ver10/media/wsdl";
+const QString ptzsrv = "http://www.onvif.org/ver20/ptz/wsdl";
 
+QSharedPointer<SoapCtx> ctx = QSharedPointer<SoapCtx>::create();
 
 OnvifControl::OnvifControl(QObject *parent) : QObject(parent)
 {
-    ptzClient = new OnvifPtzClient(QUrl("http://192.168.200.65/onvif/ptz_service"));
-    mediaClient = new OnvifMediaClient(QUrl("http://192.168.200.65/onvif/media_service"));
+    //ptzClient = new OnvifPtzClient(QUrl("http://192.168.200.65/onvif/ptz_service"),ctx);
+    //mediaClient = new OnvifMediaClient(QUrl("http://192.168.200.65/onvif/media_service"),ctx);
+}
+
+int OnvifControl::GetDeviceServices( QString ipaddr, QString login, QString pass)
+{
+
+    OnvifDeviceClient onvifDevice(QUrl("http://" + ipaddr + "/onvif/device_service"),ctx);
+    onvifDevice.SetAuth(login, pass, AUTO);
+
+    Request<_tds__GetServices> request;
+    request.IncludeCapability = false;
+    auto servicesResponse = onvifDevice.GetServices(request);
+    qInfo() << "Onvif Namespaces: (" << ipaddr << ") - "<< login << "/" << pass;
+    if(servicesResponse){
+        QString mediaURL;
+        QString ptzURL;
+        for(auto service : servicesResponse.GetResultObject()->Service){
+            qInfo() << " - Name: " << service->Namespace << ", Url: " << service->XAddr;
+            if (service->Namespace == mediasrv)
+            {
+                mediaURL = service->XAddr;
+
+            }
+            if (service->Namespace == ptzsrv)
+            {
+                ptzURL = service->XAddr;
+            }
+        }
+        qInfo()  << "media service: " << mediaURL << "; ptz service: " << ptzURL;
+    } else {
+        qInfo()  << "Response empty";
+        return -1;
+    }
+    return 0;
 }
 
 void OnvifControl::InitMediaClient(QString ipaddr, QString login, QString pass)
 {
+
     /*QCommandLineParser parser;
     CmdLineParser::setup(parser);
     //parser.process(app);
@@ -22,10 +61,10 @@ void OnvifControl::InitMediaClient(QString ipaddr, QString login, QString pass)
     auto ctxBuilder = SoapCtx::Builder();
     ctxBuilder.SetSendTimeout(1000);
     ctxBuilder.SetReceiveTimeout(1000);*/
-    mediaClient->SetEndpoint(QUrl("http://" + ipaddr + "/onvif/media_service"));
-    mediaClient->SetAuth(login,pass, AUTO);
-    GetProfile();
-    GetStreamUri();
+    //mediaClient->SetEndpoint(QUrl("http://" + ipaddr + "/onvif/media_service"));
+    //mediaClient->SetAuth(login,pass, AUTO);
+    GetProfile(ipaddr, login, pass);
+    GetStreamUri(ipaddr, login, pass);
 /*    Request<_trt__GetServiceCapabilities> st_request;
     Response<_trt__GetServiceCapabilitiesResponse> res = mpMediaClient->GetServiceCapabilities(st_request);
     if(res)
@@ -35,43 +74,49 @@ void OnvifControl::InitMediaClient(QString ipaddr, QString login, QString pass)
     }else qInfo() << mpMediaClient->GetFaultString();*/
 }
 
-void OnvifControl::GetProfile()
+void OnvifControl::GetProfile(QString ipaddr, QString login, QString pass)
 {
+        OnvifMediaClient mc(QUrl("http://" + ipaddr + "/onvif/media_service"),ctx);
+        mc.SetAuth(login,pass, AUTO);
+
         Request<_trt__GetProfiles> profilesRequest;
-        auto profilesResponse = mediaClient->GetProfiles(profilesRequest);
+
+        auto profilesResponse = mc.GetProfiles(profilesRequest);
 
         if(profilesResponse) {
             if(profilesResponse.GetResultObject()->Profiles.size()>0)
             {
                 auto profile = profilesResponse.GetResultObject()->Profiles[0];
                 ProfileToken = profile->token;
+                qInfo()  << "Profile: " <<profile->token;
             }
-        }else qInfo() << mediaClient->GetFaultString();
+        }else qInfo() << mc.GetFaultString();
 }
 
-void OnvifControl::GetStreamUri()
+void OnvifControl::GetStreamUri(QString ipaddr, QString login, QString pass)
 {
+    OnvifMediaClient mc(QUrl("http://" + ipaddr + "/onvif/media_service"),ctx);
+    mc.SetAuth(login,pass, AUTO);
     Request<_trt__GetStreamUri> rRequest;
-
     rRequest.StreamSetup = new tt__StreamSetup();
     rRequest.StreamSetup->Stream = tt__StreamType::RTP_Unicast;
     rRequest.StreamSetup->Transport = new tt__Transport();
     rRequest.StreamSetup->Transport->Protocol = tt__TransportProtocol::RTSP;
 
     rRequest.ProfileToken = ProfileToken;
-    Response<_trt__GetStreamUriResponse> resuri = mediaClient->GetStreamUri(rRequest);
+    Response<_trt__GetStreamUriResponse> resuri = mc.GetStreamUri(rRequest);
     if(resuri){
          tt__MediaUri * uri = resuri.GetResultObject()->MediaUri;
          stream_uri = uri->Uri;
-         qInfo()  << uri->Uri;
-    }else qInfo() << mediaClient->GetFaultString();
+         qInfo()  << "Media URL: " << uri->Uri;
+    }else qInfo() << mc.GetFaultString();
 }
 
 void OnvifControl::InitPtzClient(QString ipaddr, QString login, QString pass)
 {
-    //ClosePtzClient();
-    //ptzClient = new OnvifPtzClient(QUrl("http://" + ipaddr + "/onvif/ptz_service"));
-    ptzClient->SetEndpoint(QUrl("http://" + ipaddr + "/onvif/media_service"));
+    ClosePtzClient();
+    ptzClient = new OnvifPtzClient(QUrl("http://" + ipaddr + "/onvif/ptz_service"),ctx);
+    //ptzClient->SetEndpoint(QUrl("http://" + ipaddr + "/onvif/media_service"));
     xaddrs = ipaddr;
     ptzClient->SetAuth(login,pass,AUTO);
 }
@@ -84,8 +129,8 @@ void OnvifControl::ClosePtzClient()
 
 void OnvifControl::CloseMediaClient()
 {
-    if(mediaClient != nullptr)
-        delete mediaClient;
+   // if(mediaClient != nullptr)
+   //     delete mediaClient;
 }
 
 void OnvifControl::AbsoluteMove(float x, float y, float z)

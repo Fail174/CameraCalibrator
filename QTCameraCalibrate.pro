@@ -43,6 +43,7 @@ INCLUDEPATH += \
     include/libonvif/generated \
     libonvif \
     /usr/include/openssl \
+#LIBS += -L/home/user/Project/Calibrator/CameraCalibrator/libonvif
 LIBS += -L/usr/local/lib
 LIBS += \
     -lonvifcommon \

@@ -176,15 +176,20 @@ void MainWindow::onCameraConnect()
     QString onvifHost = ui->Host->currentText();
     QString user = ui->UserName->text();
     QString pass = ui->Password->text();
+    if(onvif->GetDeviceServices(onvifHost,user,pass)>=0)
+    {
 
-    emit eInitMediaClient(onvifHost,user,pass);
-    emit eInitPTZClient(onvifHost,user,pass);
-    QString login = ui->UserName->text() + ":" + ui->Password->text() + "@";
-    QString url = onvif->stream_uri;
-    ui->textEdit->append(url );
-    url.insert(7,login);
-    CreateStream(url);
-    timer->start(1000);
+        emit eInitMediaClient(onvifHost,user,pass);
+        emit eInitPTZClient(onvifHost,user,pass);
+        QString login = ui->UserName->text() + ":" + ui->Password->text() + "@";
+        QString url = onvif->stream_uri;
+        ui->textEdit->append(url );
+        url.insert(7,login);
+        CreateStream(url);
+        timer->start(1000);
+    }else{
+        ui->textEdit->append("Ошибка подключения к камере");
+    }
 }
 
 

@@ -2,8 +2,9 @@
 #define ONVIFCONTROL_H
 
 #include <QObject>
+#include "OnvifDeviceClient.h"
 #include "OnvifPtzClient.h"
-#include "OnvifMediaClient.h"
+//#include "OnvifMediaClient.h"
 
 typedef struct
 {
@@ -20,7 +21,7 @@ public:
     explicit OnvifControl(QObject *parent = nullptr);
     QString ProfileToken = "";
     OnvifPtzClient *ptzClient = nullptr;
-    OnvifMediaClient *mediaClient = nullptr;
+    //OnvifMediaClient *mediaClient = nullptr;
     QString stream_uri;
     QString xaddrs;
 
@@ -31,9 +32,10 @@ public:
     void PtzStop();
     void ContinuousMove(float x, float y, float z);
     void AbsoluteMove(float x, float y, float z);
+    int GetDeviceServices( QString ipaddr, QString login, QString pass);
     void InitMediaClient(QString ipaddr, QString login, QString pass);
-    void GetProfile();
-    void GetStreamUri();
+    void GetProfile(QString ipaddr, QString login, QString pass);
+    void GetStreamUri(QString ipaddr, QString login, QString pass);
 
 signals:
 
